@@ -20,11 +20,20 @@
 
         .container {
         margin: auto;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        }
+
+        .buttonRow {
+        display: flex;
+        gap: 10px;
+        margin-bottom: 10px;
         }
 
         table {
-        margin-left: 10px;
-        
+        margin-left: 0;
+
         }
 
         table, td, th{
@@ -79,9 +88,11 @@
   <body>
     <div class="container">
         <h1>Number Conversions</h1>
-        <button id="toggleHeader">Toggle Base 2/Base 16</button>
-        <button id="splitTablesBtn">Split Tables</button>
-        <button id="resetBtn">Reset</button>
+        <div class="buttonRow">
+            <button id="toggleHeader">Toggle Base 2/Base 16</button>
+            <button id="splitTablesBtn">Split Tables</button>
+            <button id="resetBtn">Reset</button>
+        </div>
         <table id="combinedTable">
         <tr id="row1">
             <th id="head1">2<sup>7</sup></th>
