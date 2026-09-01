@@ -6,16 +6,48 @@
     <!-- <link href="index.css" rel="stylesheet"> -->
      <style>
         :root {
-        --zero-color: #222;
-        
-        --one-color: #fff
+        --bg-color: #fff;
+        --text-color: #000;
+        --bit-off-bg: #fff;
+        --bit-off-color: #000;
+        --bit-off-border: #000;
+        --bit-on-bg: #000;
+        --bit-on-color: #fff;
+        --bit-on-border: #fff;
+        --button-bg: #f0f0f0;
+        --button-color: #000;
+        --button-border: #888;
         }
 
-
+        body.dark {
+        --bg-color: #121212;
+        --text-color: #eee;
+        --bit-off-bg: #2b2b2b;
+        --bit-off-color: #eee;
+        --bit-off-border: #eee;
+        --bit-on-bg: #eee;
+        --bit-on-color: #121212;
+        --bit-on-border: #121212;
+        --button-bg: #2b2b2b;
+        --button-color: #eee;
+        --button-border: #666;
+        }
 
         body {
         font-family: 'Ubuntu', sans-serif;
+        background-color: var(--bg-color);
+        color: var(--text-color);
+        transition: background-color 0.2s, color 0.2s;
+        }
 
+        button {
+        font-family: 'Ubuntu', sans-serif;
+        background-color: var(--button-bg);
+        color: var(--button-color);
+        border: 1px solid var(--button-border);
+        border-radius: 4px;
+        padding: 8px 12px;
+        cursor: pointer;
         }
 
         .container {
@@ -40,8 +72,9 @@
         font-family: 'Ubuntu', sans-serif;
         font-size: 50px;
         text-align: center;
-        border: 1px solid black;
-        border-collapse: collapse; 
+        border: 1px solid var(--text-color);
+        border-collapse: collapse;
+        color: var(--text-color);
         }
 
         td, th {
@@ -49,9 +82,16 @@
         }
 
         .bit {
-        color: var(--zero-color);
-        border: dotted;
-        background-color: var(--dark-bg-color);
+        color: var(--bit-off-color);
+        background-color: var(--bit-off-bg);
+        border: var(--bit-off-border) dotted;
+        cursor: pointer;
+        }
+
+        .bit.on {
+        color: var(--bit-on-color);
+        background-color: var(--bit-on-bg);
+        border: var(--bit-on-border) dotted;
         }
 
         .help, #directions {
@@ -89,12 +129,12 @@
     <div class="container">
         <h1>Number Conversions</h1>
         <div class="buttonRow">
-            <button id="toggleHeader">Toggle Base 2/Base 16</button>
-            <button id="splitTablesBtn">Split Tables</button>
+            <button id="combinedBtn">Toggle Base 2/Base 16 &amp; Split Tables</button>
             <button id="resetBtn">Reset</button>
+            <button id="darkModeBtn">Dark Mode</button>
         </div>
         <table id="combinedTable">
-        <tr id="row1">
+        <tr id="row1"> <!-- powers-->
             <th id="head1">2<sup>7</sup></th>
             <th id="head2">2<sup>6</sup></th>
             <th id="head3">2<sup>5</sup></th>
@@ -105,7 +145,7 @@
             <th>2<sup>0</sup></th>
 
         </tr>
-        <tr id="row2">
+        <tr id="row2"> <!-- values-->
             <td>128</td>
             <td>64</td>
             <td>32</td>
@@ -115,7 +155,7 @@
             <td>2</td>
             <td>1</td>
         </tr>
-        <tr id="row3">
+        <tr id="row3"> <!-- bits-->
             <td class="bit" id="128">0</td>
             <td class="bit" id="64">0</td>
             <td class="bit" id="32">0</td>
@@ -141,65 +181,76 @@
     </div>
   </body>
   <script>
-    $(".bit").click(function() {
-    if( $(this).html()  == 0 ) {
-        $(this).html("1");
-        $(this).css("color", "#fff");
-        $(this).css("background-color", "black");
-        $(this).css("border", "white dotted");
-    }
-    else {
-        $(this).html("0");
-        $(this).css("color", "black");
-        $(this).css("background-color", "white");
-        $(this).css("border", "black dotted");
-    }
+    $(document).on("click", ".bit", function() {
+        var $bit = $(this).toggleClass("on");
+        $bit.text($bit.hasClass("on") ? "1" : "0");
     });
 
     var originalHeaders = ["2<sup>7</sup>", "2<sup>6</sup>", "2<sup>5</sup>", "2<sup>4</sup>"];
     var altHeaders = ["2<sup>3</sup>", "2<sup>2</sup>", "2<sup>1</sup>", "2<sup>0</sup>"];
+    var $headers = [$("#head1"), $("#head2"), $("#head3"), $("#head4")];
+    var $combinedTable = $("#combinedTable");
+    var $splitTables = $("#splitTables");
     var showingAlt = false;
-
-    $("#toggleHeader").click(function() {
-        var headers = showingAlt ? originalHeaders : altHeaders;
-        $("#head1").html(headers[0]);
-        $("#head2").html(headers[1]);
-        $("#head3").html(headers[2]);
-        $("#head4").html(headers[3]);
-        showingAlt = !showingAlt;
-    });
-
     var isSplit = false;
+    var storedLeftCells = {};
 
-    $("#splitTablesBtn").click(function() {
+    $("#combinedBtn").click(function() {
+        var headers = showingAlt ? originalHeaders : altHeaders;
+        $headers.forEach(function($h, i) { $h.html(headers[i]); });
+        showingAlt = !showingAlt;
+
         if (!isSplit) {
             for (var i = 1; i <= 3; i++) {
                 var cells = $("#row" + i).children();
-                cells.slice(0, 4).appendTo("#leftRow" + i);
+                var leftCells = cells.slice(0, 4);
                 cells.slice(4, 8).appendTo("#rightRow" + i);
+
+                if (i === 3) {
+                    // bit row: keep the real cells so toggled values are preserved, not mirrored
+                    leftCells.appendTo("#leftRow" + i);
+                } else {
+                    storedLeftCells[i] = leftCells.detach();
+                    $("#leftRow" + i).html($("#rightRow" + i).html());
+                }
             }
-            $("#combinedTable").hide();
-            $("#splitTables").css("display", "flex");
-            $(this).html("Combine Tables");
+            $combinedTable.hide();
+            $splitTables.css("display", "flex");
         } else {
             for (var i = 1; i <= 3; i++) {
-                $("#leftRow" + i).children().appendTo("#row" + i);
                 $("#rightRow" + i).children().appendTo("#row" + i);
+
+                if (i === 3) {
+                    $("#leftRow" + i).children().prependTo("#row" + i);
+                } else {
+                    storedLeftCells[i].prependTo("#row" + i);
+                    $("#leftRow" + i).empty();
+                }
             }
-            $("#splitTables").hide();
-            $("#combinedTable").show();
-            $(this).html("Split Tables");
+            $splitTables.hide();
+            $combinedTable.show();
         }
         isSplit = !isSplit;
     });
 
     $("#resetBtn").click(function() {
-        $(".bit").each(function() {
-            $(this).html("0");
-            $(this).css("color", "black");
-            $(this).css("background-color", "white");
-            $(this).css("border", "black dotted");
-        });
+        $(".bit").removeClass("on").text("0");
+    });
+
+    var $body = $("body");
+    var $darkModeBtn = $("#darkModeBtn");
+
+    function applyDarkMode(isDark) {
+        $body.toggleClass("dark", isDark);
+        $darkModeBtn.text(isDark ? "Light Mode" : "Dark Mode");
+    }
+
+    applyDarkMode(localStorage.getItem("darkMode") === "true");
+
+    $darkModeBtn.click(function() {
+        var isDark = !$body.hasClass("dark");
+        applyDarkMode(isDark);
+        localStorage.setItem("darkMode", isDark);
     });
   </script>
 
