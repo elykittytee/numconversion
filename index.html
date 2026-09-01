@@ -1,0 +1,195 @@
+<html>
+  <head>
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script>
+
+    <link href="https://fonts.googleapis.com/css2?family=Ubuntu:wght@400;700&display=swap" rel="stylesheet">
+    <!-- <link href="index.css" rel="stylesheet"> -->
+     <style>
+        :root {
+        --zero-color: #222;
+        
+        --one-color: #fff
+        }
+
+
+
+        body {
+        font-family: 'Ubuntu', sans-serif;
+
+        }
+
+        .container {
+        margin: auto;
+        }
+
+        table {
+        margin-left: 10px;
+        
+        }
+
+        table, td, th{
+        font-family: 'Ubuntu', sans-serif;
+        font-size: 50px;
+        text-align: center;
+        border: 1px solid black;
+        border-collapse: collapse; 
+        }
+
+        td, th {
+        padding: 30px;
+        }
+
+        .bit {
+        color: var(--zero-color);
+        border: dotted;
+        background-color: var(--dark-bg-color);
+        }
+
+        .help, #directions {
+        margin-top: 20px;
+        margin-left: 10px;
+        
+        }
+
+        #directions {
+        margin-right: 20px;
+        padding:20px;
+        background-color: #EFC2FF;
+        border-radius: 5px;
+        }
+
+
+        @media 
+        only screen and (max-width: 760px),
+        (min-device-width: 500px) and (max-device-width: 1024px)  {
+
+            /* Force table to not be like tables anymore */
+        
+            table, td, th{
+            font-family: 'Ubuntu', sans-serif;
+            font-size: 24px;
+            padding: 5px;
+            text-align: center;
+            border: 1px solid black;
+            border-collapse: collapse; 
+            }
+        }
+     </style>
+  </head>
+  <body>
+    <div class="container">
+        <h1>Number Conversions</h1>
+        <button id="toggleHeader">Toggle Base 2/Base 16</button>
+        <button id="splitTablesBtn">Split Tables</button>
+        <button id="resetBtn">Reset</button>
+        <table id="combinedTable">
+        <tr id="row1">
+            <th id="head1">2<sup>7</sup></th>
+            <th id="head2">2<sup>6</sup></th>
+            <th id="head3">2<sup>5</sup></th>
+            <th id="head4">2<sup>4</sup></th>
+            <th>2<sup>3</sup></th>
+            <th>2<sup>2</sup></th>
+            <th>2<sup>1</sup></th>
+            <th>2<sup>0</sup></th>
+
+        </tr>
+        <tr id="row2">
+            <td>128</td>
+            <td>64</td>
+            <td>32</td>
+            <td>16</td>
+            <td>8</td>
+            <td>4</td>
+            <td>2</td>
+            <td>1</td>
+        </tr>
+        <tr id="row3">
+            <td class="bit" id="128">0</td>
+            <td class="bit" id="64">0</td>
+            <td class="bit" id="32">0</td>
+            <td class="bit" id="16">0</td>
+            <td class="bit" id="8">0</td>
+            <td class="bit" id="4">0</td>
+            <td class="bit" id="2">0</td>
+            <td class="bit" id="1">0</td>
+        </tr>
+        </table>
+        <div id="splitTables" style="display:none; gap: 20px;">
+            <table id="leftTable">
+                <tr id="leftRow1"></tr>
+                <tr id="leftRow2"></tr>
+                <tr id="leftRow3"></tr>
+            </table>
+            <table id="rightTable">
+                <tr id="rightRow1"></tr>
+                <tr id="rightRow2"></tr>
+                <tr id="rightRow3"></tr>
+            </table>
+        </div>
+    </div>
+  </body>
+  <script>
+    $(".bit").click(function() {
+    if( $(this).html()  == 0 ) {
+        $(this).html("1");
+        $(this).css("color", "#fff");
+        $(this).css("background-color", "black");
+        $(this).css("border", "white dotted");
+    }
+    else {
+        $(this).html("0");
+        $(this).css("color", "black");
+        $(this).css("background-color", "white");
+        $(this).css("border", "black dotted");
+    }
+    });
+
+    var originalHeaders = ["2<sup>7</sup>", "2<sup>6</sup>", "2<sup>5</sup>", "2<sup>4</sup>"];
+    var altHeaders = ["2<sup>3</sup>", "2<sup>2</sup>", "2<sup>1</sup>", "2<sup>0</sup>"];
+    var showingAlt = false;
+
+    $("#toggleHeader").click(function() {
+        var headers = showingAlt ? originalHeaders : altHeaders;
+        $("#head1").html(headers[0]);
+        $("#head2").html(headers[1]);
+        $("#head3").html(headers[2]);
+        $("#head4").html(headers[3]);
+        showingAlt = !showingAlt;
+    });
+
+    var isSplit = false;
+
+    $("#splitTablesBtn").click(function() {
+        if (!isSplit) {
+            for (var i = 1; i <= 3; i++) {
+                var cells = $("#row" + i).children();
+                cells.slice(0, 4).appendTo("#leftRow" + i);
+                cells.slice(4, 8).appendTo("#rightRow" + i);
+            }
+            $("#combinedTable").hide();
+            $("#splitTables").css("display", "flex");
+            $(this).html("Combine Tables");
+        } else {
+            for (var i = 1; i <= 3; i++) {
+                $("#leftRow" + i).children().appendTo("#row" + i);
+                $("#rightRow" + i).children().appendTo("#row" + i);
+            }
+            $("#splitTables").hide();
+            $("#combinedTable").show();
+            $(this).html("Split Tables");
+        }
+        isSplit = !isSplit;
+    });
+
+    $("#resetBtn").click(function() {
+        $(".bit").each(function() {
+            $(this).html("0");
+            $(this).css("color", "black");
+            $(this).css("background-color", "white");
+            $(this).css("border", "black dotted");
+        });
+    });
+  </script>
+
+</html>
